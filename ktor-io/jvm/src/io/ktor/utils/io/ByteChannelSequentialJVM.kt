@@ -86,10 +86,6 @@ public class ByteChannelSequentialJVM(
     }
 
     override fun readAvailable(min: Int, block: (ByteBuffer) -> Unit): Int {
-        if (closed) {
-            throw closedCause ?: ClosedSendChannelException("Channel closed for read")
-        }
-
         if (availableForRead < min) {
             return -1
         }

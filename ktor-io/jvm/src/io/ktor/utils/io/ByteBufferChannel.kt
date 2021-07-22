@@ -14,10 +14,8 @@ import java.io.EOFException
 import java.lang.Double.*
 import java.lang.Float.*
 import java.nio.*
-import java.util.concurrent.atomic.*
 import kotlin.coroutines.*
 import kotlin.coroutines.intrinsics.*
-import kotlin.require
 
 internal const val DEFAULT_CLOSE_MESSAGE: String = "Byte channel was closed"
 private const val BYTE_BUFFER_CAPACITY: Int = 4088
@@ -2269,6 +2267,7 @@ internal open class ByteBufferChannel(
 
     @Volatile
     private var writeSuspensionSize: Int = 0
+
     private val writeSuspension = { ucont: Continuation<Unit> ->
         val size = writeSuspensionSize
 

@@ -798,6 +798,10 @@ public abstract class ByteChannelSequentialBase(
         ensureNotClosed()
     }
 
+    override suspend fun awaitContent() {
+        await(1)
+    }
+
     final override suspend fun peekTo(
         destination: Memory,
         destinationOffset: Long,

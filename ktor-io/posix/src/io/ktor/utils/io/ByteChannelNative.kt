@@ -11,6 +11,7 @@ import io.ktor.utils.io.internal.*
 import io.ktor.utils.io.pool.*
 import kotlinx.cinterop.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 
 /**
  * Creates buffered channel for asynchronous reading and writing of sequences of bytes.
@@ -77,6 +78,23 @@ internal class ByteChannelNative(
             attachedJob = null
             if (cause != null) cancel(cause)
         }
+    }
+
+    public override fun readAvailable(min: Int, block: (Buffer) -> Unit): Int {
+        if (availableForRead < min) {
+            return -1
+        }
+
+        prepareFlushedBytes()
+
+        var result = 0
+        readable.read(min) {
+            val position = it.readPosition
+            block(it)
+            result = it.readPosition - position
+        }
+
+        return result
     }
 
     override suspend fun readAvailable(dst: CPointer<ByteVar>, offset: Int, length: Int): Int {
@@ -176,6 +194,26 @@ internal class ByteChannelNative(
             if (rem > 0) flush()
             else afterWrite(size.toInt())
         }
+    }
+
+    public override fun writeAvailable(min: Int, block: (Buffer) -> Unit): Int {
+        if (closed) {
+            throw closedCause ?: ClosedSendChannelException("Channel closed for write")
+        }
+
+        if (availableForWrite < min) {
+            return -1
+        }
+
+        var result = 0
+        writable.write(min) {
+            val position = it.writePosition
+            block(it)
+            result = it.writePosition - position
+            result
+        }
+
+        return result
     }
 
     override suspend fun writeAvailable(src: CPointer<ByteVar>, offset: Int, length: Int): Int {

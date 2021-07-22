@@ -238,7 +238,7 @@ public actual interface ByteReadChannel {
         max: Long
     ): Long
 
-    public suspend fun awaitContent()
+    public actual suspend fun awaitContent()
 
     public actual companion object {
         public actual val Empty: ByteReadChannel by lazy { ByteChannel().apply { close() } }

@@ -159,6 +159,8 @@ public expect interface ByteReadChannel {
      */
     public suspend fun discard(max: Long): Long
 
+    public suspend fun awaitContent()
+
     /**
      * Try to copy at least [min] but up to [max] bytes to the specified [destination] buffer from this input
      * skipping [offset] bytes. If there are not enough bytes available to provide [min] bytes after skipping [offset]

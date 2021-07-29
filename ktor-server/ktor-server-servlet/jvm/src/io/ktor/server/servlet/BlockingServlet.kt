@@ -26,6 +26,10 @@ internal class BlockingServletApplicationCall(
     override val response: BlockingServletApplicationResponse =
         BlockingServletApplicationResponse(this, servletResponse, coroutineContext)
 
+    override fun onCallFinish(handler: (Throwable?) -> Unit) {
+        coroutineContext.job.invokeOnCompletion(handler)
+    }
+
     init {
         putResponseAttribute()
         putServletAttributes(servletRequest)

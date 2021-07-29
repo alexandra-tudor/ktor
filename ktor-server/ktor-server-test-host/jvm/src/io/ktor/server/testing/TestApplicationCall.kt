@@ -37,6 +37,9 @@ class TestApplicationCall(
 
     override val request: TestApplicationRequest = TestApplicationRequest(this, closeRequest)
     override val response: TestApplicationResponse = TestApplicationResponse(this, readResponse)
+    override fun onCallFinish(handler: (Throwable?) -> Unit) {
+        coroutineContext.job.invokeOnCompletion(handler)
+    }
 
     @Suppress("DEPRECATION")
     override fun toString(): String = "TestApplicationCall(uri=${request.uri})"

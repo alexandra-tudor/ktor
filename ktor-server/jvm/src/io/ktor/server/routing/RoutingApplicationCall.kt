@@ -9,6 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.*
+import kotlinx.coroutines.*
 
 /**
  * Represents an application call being handled by [Routing]
@@ -17,6 +18,7 @@ import io.ktor.util.*
 public class RoutingApplicationCall(
     private val call: ApplicationCall,
     public val route: Route,
+    private val job: Job,
     receivePipeline: ApplicationReceivePipeline,
     responsePipeline: ApplicationSendPipeline,
     parameters: Parameters
@@ -35,6 +37,10 @@ public class RoutingApplicationCall(
             appendAll(call.parameters)
             appendMissing(parameters)
         }
+    }
+
+    override fun onCallFinish(handler: (Throwable?) -> Unit) {
+        job.invokeOnCompletion(handler)
     }
 
     override fun toString(): String = "RoutingApplicationCall(route=$route)"

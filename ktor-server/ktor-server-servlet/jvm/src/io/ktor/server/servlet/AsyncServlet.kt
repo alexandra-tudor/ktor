@@ -47,6 +47,10 @@ public open class AsyncServletApplicationCall(
         }
     }
 
+    override fun onCallFinish(handler: (Throwable?) -> Unit) {
+        coroutineContext.job.invokeOnCompletion(handler)
+    }
+
     init {
         putServletAttributes(servletRequest)
     }

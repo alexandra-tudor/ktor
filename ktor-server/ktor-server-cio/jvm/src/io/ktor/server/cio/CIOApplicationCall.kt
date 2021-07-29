@@ -22,7 +22,8 @@ internal class CIOApplicationCall(
     appDispatcher: CoroutineContext,
     upgraded: CompletableDeferred<Boolean>?,
     remoteAddress: SocketAddress?,
-    localAddress: SocketAddress?
+    localAddress: SocketAddress?,
+    private val job: Job
 ) : BaseApplicationCall(application) {
 
     override val request = CIOApplicationRequest(
@@ -34,6 +35,9 @@ internal class CIOApplicationCall(
     )
 
     override val response = CIOApplicationResponse(this, output, input, engineDispatcher, appDispatcher, upgraded)
+    override fun onCallFinish(handler: (Throwable?) -> Unit) {
+        job.invokeOnCompletion(handler)
+    }
 
     internal fun release() {
         request.release()

@@ -37,4 +37,11 @@ public interface ApplicationCall {
      * Parameters associated with this call
      */
     public val parameters: Parameters
+
+    /**
+     * Callback that will be executed after the call finishes its execution
+     *
+     * @param exception optional exception that happened before the call has finished
+     * */
+    public fun onCallFinish(handler: (Throwable?) -> Unit)
 }

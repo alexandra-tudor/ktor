@@ -37,7 +37,7 @@ class ApplicationPluginTest {
         data class Config(var enabled: Boolean = true)
 
         val plugin = createPlugin("F", createConfiguration = { Config() }) {
-            onRequest { call ->
+            onCall { call ->
                 if (this@createPlugin.pluginConfig.enabled) {
                     call.respondText("Plugin enabled!")
                     finish()
@@ -70,16 +70,18 @@ class ApplicationPluginTest {
         val plugin = createPlugin("F", createConfiguration = { }) {
             val key = AttributeKey<String>("FKey")
 
-            onRequest { call ->
+            onCall { call ->
                 val data = call.request.headers["F"]
                 if (data != null) {
                     call.attributes.put(key, data)
                 }
             }
-            onCallRespond.beforeTransform { call ->
+            onCallRespond { call ->
                 val data = call.attributes.getOrNull(key)
                 if (data != null) {
-                    transformRespondBody { data }
+                    transformRespondBody {
+                        data
+                    }
                 }
             }
         }
@@ -116,7 +118,7 @@ class ApplicationPluginTest {
     @Test
     fun `test dependent plugins`() {
         val pluginF = createPlugin("F", {}) {
-            onCallRespond.beforeTransform { call ->
+            onCallRespond { call ->
                 val data = call.attributes.getOrNull(FConfig.Key)
                 if (data != null) {
                     transformRespondBody { data }
@@ -125,8 +127,8 @@ class ApplicationPluginTest {
         }
 
         val pluginG = createPlugin("G", {}) {
-            beforePlugin(pluginF) {
-                onCallRespond.beforeTransform { call ->
+            beforePlugins(pluginF) {
+                onCallRespond { call ->
                     val data = call.request.headers["F"]
                     if (data != null) {
                         call.attributes.put(FConfig.Key, data)
@@ -166,7 +168,7 @@ class ApplicationPluginTest {
     @Test
     fun `test multiple installs changing config`() {
         val pluginF = createPlugin("F", { ConfigWithData() }) {
-            onRequest { call ->
+            onCall { call ->
                 val oldValue = pluginConfig.data
                 pluginConfig.data = "newValue"
                 val newValue = pluginConfig.data
